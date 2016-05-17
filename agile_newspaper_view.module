@@ -10,6 +10,7 @@ function agile_newspaper_view_preprocess_islandora_newspaper(&$variables) {
   $render_array['#suffix'] = "</div>";
 
   $form['year_selector'] = array(
+    '#weight' => -1,
     '#id' => 'agile_year_select',
     '#type' => 'select',
     '#options' => $years,
@@ -19,4 +20,5 @@ function agile_newspaper_view_preprocess_islandora_newspaper(&$variables) {
   $variables['islandora_content_render_array']['year_selector'] = $form['year_selector'];
   $path = drupal_get_path('module', 'agile_newspaper_view');
   drupal_add_js("$path/js/agile_newspaper.js");
+  drupal_add_css("$path/css/agile_newspaper_view.css");
 }
