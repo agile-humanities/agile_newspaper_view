@@ -1,0 +1,8 @@
+name = Agile Humanities Newspaper View
+description = Custom Newspaper View for Islandora solution pack
+core = 7.x
+
+dependencies[] = islandora_newspaper
+
+package = Agile Humanities
+version = 7.x-1.1

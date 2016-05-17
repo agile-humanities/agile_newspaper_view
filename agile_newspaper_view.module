@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * Implements hook_preprocess().
+ */
+function agile_newspaper_view_preprocess_islandora_newspaper(&$variables) {
+  $years = element_children($variables['islandora_content_render_array']['tabs']);
+  $render_array = $variables['islandora_content_render_array']['tabs'][$years[0]];
+  $render_array['#prefix'] = "<div id = 'current_year'>";
+  $render_array['#suffix'] = "</div>";
+
+  $form['year_selector'] = array(
+    '#id' => 'agile_year_select',
+    '#type' => 'select',
+    '#options' => $years,
+    '#title' => t('Year of publication'),
+  );
+  $variables['islandora_content_render_array']['months'] = $render_array;
+  $variables['islandora_content_render_array']['year_selector'] = $form['year_selector'];
+  $path = drupal_get_path('module', 'agile_newspaper_view');
+  drupal_add_js("$path/js/agile_newspaper.js");
+}
