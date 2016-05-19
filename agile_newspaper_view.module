@@ -52,8 +52,9 @@ function make_element($path) {
     '#suffix' => '</span>',
     '#height' => '80px',
     '#path' => "$path/datastream/TN/view",
+    '#attributes' => array('class' => 'agile_newspaper_thumb'),
     '#options' => array(
-      'attributes' => array('class' => 'agile_newspaper_thumb'),
+      'attributes' => array(),
       'html' => FALSE,
     ),
   );
