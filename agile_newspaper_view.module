@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Miscellaneous hook implementations.
+ */
+
+/**
  * Implements hook_preprocess().
  */
 function agile_newspaper_view_preprocess_islandora_newspaper(&$variables) {
