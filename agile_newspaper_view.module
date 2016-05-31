@@ -6,12 +6,27 @@
  */
 
 /**
+ * Implements hook_menu().
+ */
+function agile_newspaper_view_menu() {
+  $items['agile/newspaper/view/callback'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'agile_newspaper_view_get_year',
+    'file' => 'includes/utilities.inc',
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+/**
  * Implements hook_preprocess().
  */
 function agile_newspaper_view_preprocess_islandora_newspaper(&$variables) {
+  global $base_url;
+  $path = drupal_get_path('module', 'agile_newspaper_view');
+  module_load_include('inc', 'agile_newspaper_view', 'includes/utilities');
   $years = element_children($variables['islandora_content_render_array']['tabs']);
-  $variables['islandora_content_render_array']['controls']['#links'][0]['attributes']['onclick'] = 'Drupal.agile_newspaper_expand()';
-  $images_added = agile_newspaper_view_add_images($years, $variables['islandora_content_render_array']['tabs']);
+  agile_newspaper_view_add_images($variables['islandora_content_render_array']['tabs'][$years[0]]);
   $render_array = $variables['islandora_content_render_array']['tabs'][$years[0]];
   $render_array['#prefix'] = "<div id = 'current_year'>";
   $render_array['#suffix'] = "</div>";
@@ -22,57 +37,27 @@ function agile_newspaper_view_preprocess_islandora_newspaper(&$variables) {
     '#options' => $years,
     '#title' => t('Year of publication'),
   );
-  $variables['islandora_content_render_array']['months'] = $render_array;
-  $variables['islandora_content_render_array']['year_selector'] = $form['year_selector'];
-  $path = drupal_get_path('module', 'agile_newspaper_view');
-  drupal_add_js("$path/js/agile_newspaper.js");
-  drupal_add_css("$path/css/agile_newspaper_view.css");
-}
-
-/**
- * Adds images to default issue output.
- *
- * @param array $years
- *  All represented years
- * @param array $input_array
- *   Existing rendered array
- */
-function agile_newspaper_view_add_images($years, &$input_array) {
-  foreach ($years as $year) {
-    $current_year = $input_array[$year];
-    $months = element_children($input_array[$year]);
-    foreach ($months as $month) {
-      $current_month = $current_year[$month];
-      $issues = element_children($current_month);
-      foreach ($issues as $issue) {
-        $path = $current_month[$issue][0]['#path'];
-        $input_array[$year][$month][$issue][0]['#prefix'] = '<span class = "agile_issue_title">';
-        $input_array[$year][$month][$issue][0]['#suffix'] = '</span>';
-        $input_array[$year][$month][$issue][] = agile_newspaper_view_make_element($path);
-      }
-    }
-  }
-}
-
-/**
- * Makes image element
- *
- * @param string $path
- *   Path to islandora object
- * @return array
- *   Image element for render array
- */
-function agile_newspaper_view_make_element($path) {
-  return array(
+  $form['loader'] = array(
     '#theme' => 'image',
-    '#prefix' => '<span class = "agile_issue_image">',
+    '#prefix' => '<span class = "loader_gif">',
     '#suffix' => '</span>',
-    '#height' => '80px',
-    '#path' => "",
-    '#attributes' => array('class' => 'agile_newspaper_thumb','data' => "/$path/datastream/TN/view"),
+    '#path' => "$base_url/$path/images/ajax-loader.gif",
+    '#attributes' => array('class' => 'agile_newspaper_spinner'),
     '#options' => array(
       'attributes' => array(),
       'html' => FALSE,
     ),
   );
+  $variables['islandora_content_render_array']['months'] = $render_array;
+  $variables['islandora_content_render_array']['year_selector'] = $form['year_selector'];
+  $variables['islandora_content_render_array']['loader'] = $form['loader'];
+
+  $variables['islandora_content_render_array']['tabs'] = NULL;
+  $variables['islandora_content_render_array']['tabs']['#type'] = 'vertical_tabs';
+  drupal_add_js("$path/js/agile_newspaper.js");
+  drupal_add_js(array('agile_newspaper_view' => array(
+      'pid' => $variables['object']->id,
+      'callback_path' => "$base_url/agile/newspaper/view/callback"),
+      ), array('type' => 'setting'));
+  drupal_add_css("$path/css/agile_newspaper_view.css");
 }

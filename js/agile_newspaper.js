@@ -1,30 +1,42 @@
 
 (function ($) {
-    Drupal.agile_newspaper_expand = function () {
-        Drupal.toggleFieldset($('#current_year').find('fieldset.collapsible'));
-        $('#current_year').find('.agile_newspaper_thumb').each(function(){
-            $(this).attr('src', $(this).attr('data'));
-        });
-    };
     Drupal.behaviors.agile_newspaper = {
         'attach': function (context) {
             $(".month").addClass('collapsed');
+            $('.loader_gif').hide();
+
             var switcher = function () {
                 var selected = $('#agile_year_select option:selected').text();
-                var selector = '.fieldset-legend:contains(' + selected + ')';
-                var active = $(selector).closest('.form-wrapper').wrap('<fieldset class="form-wrapper"></fieldset>');
-                $('#current_year').html(active.html());
-                $('#current_year').find('a.fieldset-title').click(function () {
-                    Drupal.toggleFieldset($(this).closest('fieldset.collapsible'));
-                    var $month = $(this).closest('fieldset.month');
-                    $month.find('img').each(function () {
-                        $(this).attr('src', $(this).attr('data'));
-                    });
+                $.ajax({
+                    url: Drupal.settings.agile_newspaper_view.callback_path,
+                    type: "POST",
+                    beforeSend: function () {
+                        $('.loader_gif').show();
+                    },
+                    data: {
+                        pid: Drupal.settings.agile_newspaper_view.pid,
+                        year: selected
+                    },
+                    success: function (results, status, xhr) {
+                        $('#current_year').html(results);
+                        $(".month").addClass('collapsed');
+                        $(".month .fieldset-legend").each(function () {
+                            var span_text = '<a class="fieldset-title">'
+                            span_text += '<span class="fieldset-legend-prefix element-invisible">Hide</span>';
+                            span_text += $(this).text();
+                            span_text += '</a><span class="summary" />';
+                            $(this).html(span_text);
+                        })
+                        $('#current_year').find('a.fieldset-title').click(function () {
+                            Drupal.toggleFieldset($(this).closest('fieldset.collapsible'));
+                        });
+                        $('.loader_gif').hide();
+                    },
+                    error: function (data, status, xhd) {
+                        console.log("The function switcher has failed");
+                    }
                 });
             }
-            $('.vertical-tab-button').hide();
-            $('.vertical-tabs-panes').first().hide();
-            switcher();
             $('#agile_year_select').change(switcher)
         }
     };
