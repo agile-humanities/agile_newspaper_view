@@ -2,9 +2,7 @@
 (function ($) {
     Drupal.behaviors.agile_newspaper = {
         'attach': function (context) {
-            $(".month").addClass('collapsed');
             $('.loader_gif').hide();
-
             var switcher = function () {
                 var selected = $('#agile_year_select option:selected').text();
                 $.ajax({
@@ -19,7 +17,6 @@
                     },
                     success: function (results, status, xhr) {
                         $('#current_year').html(results);
-                        $(".month").addClass('collapsed');
                         $(".month .fieldset-legend").each(function () {
                             var span_text = '<a class="fieldset-title">'
                             span_text += '<span class="fieldset-legend-prefix element-invisible">Hide</span>';
@@ -38,6 +35,7 @@
                 });
             }
             $('#agile_year_select').change(switcher)
+            switcher();
         }
     };
 })(jQuery);

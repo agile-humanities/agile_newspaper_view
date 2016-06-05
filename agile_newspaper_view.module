@@ -24,12 +24,26 @@ function agile_newspaper_view_menu() {
 function agile_newspaper_view_preprocess_islandora_newspaper(&$variables) {
   global $base_url;
   $path = drupal_get_path('module', 'agile_newspaper_view');
+  drupal_add_js("$path/js/agile_newspaper.js");
+  drupal_add_js(array('agile_newspaper_view' => array(
+      'pid' => $variables['object']->id,
+      'callback_path' => "$base_url/agile/newspaper/view/callback"),
+      ), array('type' => 'setting'));
+  drupal_add_css("$path/css/agile_newspaper_view.css");
+
   module_load_include('inc', 'agile_newspaper_view', 'includes/utilities');
   $years = element_children($variables['islandora_content_render_array']['tabs']);
-  agile_newspaper_view_add_images($variables['islandora_content_render_array']['tabs'][$years[0]]);
-  $render_array = $variables['islandora_content_render_array']['tabs'][$years[0]];
-  $render_array['#prefix'] = "<div id = 'current_year'>";
-  $render_array['#suffix'] = "</div>";
+  if ($years) {
+    agile_newspaper_view_add_images($variables['islandora_content_render_array']['tabs'][$years[0]]);
+    $render_array = $variables['islandora_content_render_array']['tabs'][$years[0]];
+
+
+
+    $months = element_children($render_array);
+    foreach ($months as $month) {
+      $render_array[$month]['#attributes']['class'][] = 'collapsed';
+    }
+  }
   $form['year_selector'] = array(
     '#weight' => -1,
     '#id' => 'agile_year_select',
@@ -48,9 +62,21 @@ function agile_newspaper_view_preprocess_islandora_newspaper(&$variables) {
       'html' => FALSE,
     ),
   );
-  $variables['islandora_content_render_array']['months'] = $render_array;
-  $variables['islandora_content_render_array']['year_selector'] = $form['year_selector'];
-  $variables['islandora_content_render_array']['loader'] = $form['loader'];
+  $form['empty'] = array(
+    '#markup' => t("There are no issues of this newspaper available"),
+  );
+  if ($years) {
+    $render_array['#prefix'] = "<div id = 'current_year'>";
+    $render_array['#suffix'] = "</div>";
+    $variables['islandora_content_render_array']['year_selector'] = $form['year_selector'];
+    $variables['islandora_content_render_array']['months'] = $render_array;
+    $variables['islandora_content_render_array']['loader'] = $form['loader'];
+  }
+  else {
+    $variables['islandora_content_render_array']['year_selector'] = $form['empty'];
+    $variables['islandora_content_render_array']['controls'] = NULL;
+  }
+
 
   $variables['islandora_content_render_array']['tabs'] = NULL;
   $variables['islandora_content_render_array']['tabs']['#type'] = 'vertical_tabs';

@@ -33,7 +33,7 @@ function agile_newspaper_view_get_year() {
       '#title' => $month_name,
       '#type' => 'fieldset',
       '#attributes' => array(
-        'class' => array('collapsible', 'month'),
+        'class' => array('collapsible', 'month', 'collapsed'),
       ),
     );
     foreach ($days as $day => $issues) {
@@ -78,7 +78,19 @@ function agile_newspaper_view_add_images(&$input_array) {
       $path = $input_array[$month][$issue][0]['#path'];
       $input_array[$month][$issue][0]['#prefix'] = '<span class = "agile_issue_title">';
       $input_array[$month][$issue][0]['#suffix'] = '</span>';
-      $input_array[$month][$issue][] = agile_newspaper_view_make_element($path);
+      $img = agile_newspaper_view_make_element($path);
+
+      $input_array[$month][$issue][] = array(
+        '#theme' => 'link',
+        '#prefix' => '<span class = "agile_issue_image">',
+        '#suffix' => '</span>',
+        '#text' => drupal_render($img),
+        '#path' => $path,
+        '#options' => array(
+          'attributes' => array(),
+          'html' => TRUE,
+        ),
+      );
     }
   }
 }
